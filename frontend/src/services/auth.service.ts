@@ -7,12 +7,12 @@ export const AuthService = {
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const { data } = await api.post<AuthResponse>('/auth/login', credentials);
-    
-    // Opcional: Se a API já retornar o token
-    if (data.token) {
-      localStorage.setItem('@Helpdesk:token', data.token);
+    const token = data.token || data.access_token;
+
+    if (token) {
+      localStorage.setItem('@Helpdesk:token', token);
     }
-    
+
     return data;
   },
 
