@@ -9,6 +9,8 @@ import { Repository } from 'typeorm';
 import { Company } from './entities/company.entity';
 import { User } from '../users/entities/user.entity';
 import { Role } from '../users/enums/role.enum';
+import { ModuleCompanyAccess } from '../../helpdesk-modules/entities/module-company-access.entity';
+import { HelpdeskModule } from '../../helpdesk-modules/entities/helpdesk-module.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -18,6 +20,10 @@ export class CompaniesService {
     private readonly companiesRepository: Repository<Company>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(ModuleCompanyAccess)
+    private readonly accessRepository: Repository<ModuleCompanyAccess>,
+    @InjectRepository(HelpdeskModule)
+    private readonly modulesRepository: Repository<HelpdeskModule>,
   ) { }
 
   async create(createCompanyDto: any): Promise<Company> {
@@ -85,6 +91,18 @@ export class CompaniesService {
         is_active: true,
       });
       const savedCompany = await this.companiesRepository.save(company);
+
+      // Assign access to all active modules
+      const activeModules = await this.modulesRepository.find({
+        where: { is_active: true },
+      });
+      const accessEntries = activeModules.map((module) =>
+        this.accessRepository.create({
+          module_id: module.id,
+          company_id: savedCompany.id,
+        }),
+      );
+      await this.accessRepository.save(accessEntries);
 
       try {
         // Criar usuário admin para a empresa
