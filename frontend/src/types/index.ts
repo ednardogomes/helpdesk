@@ -1,10 +1,24 @@
+export interface Company {
+  id: number;
+  name: string;
+}
+
 export interface User {
-  id: string;
+  id: number;
   email: string;
   name: string;
-  companyId: string;
-  sectorId: string;
   role: string;
+  company_id?: number | null;
+  company?: Company | null;
+}
+
+export interface Ticket {
+  id: number;
+  subject: string;
+  status: string;
+  priority: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface AuthResponse {

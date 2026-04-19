@@ -1,41 +1,40 @@
 <template>
   <AppLayout>
-    <div class="w-full max-w-6xl mx-auto">
-      <div class="mb-8">
-        <h2 class="text-3xl font-bold text-slate-800">Meus Helpdesks</h2>
-        <p class="text-slate-600 mt-2">
-          Selecione o departamento para o qual deseja abrir um chamado.
+    <div class="w-full max-w-7xl mx-auto">
+      <div class="mb-10">
+        <h2 class="text-4xl font-black text-white drop-shadow-lg">Meus Helpdesks</h2>
+        <p class="text-indigo-200 mt-3 text-lg font-medium">
+          Selecione o departamento para abrir um novo chamado
         </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Cards dos Módulos (Renderização Mockada) -->
+        <!-- Cards dos Módulos -->
         <Card 
           v-for="module in helpdeskModules" 
           :key="module.id" 
           @click="router.push('/ticket/new/' + module.id)"
-          class="shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer border border-slate-100"
+          class="shadow-xl hover:shadow-2xl hover:scale-105 transition-all cursor-pointer border-2 border-indigo-300 bg-gradient-to-br from-white to-indigo-50 rounded-xl overflow-hidden"
         >
           <template #title>
-            <div class="flex items-center gap-3">
-              <i :class="module.icon" class="text-2xl text-indigo-600"></i>
-              <span class="text-xl font-bold text-slate-700">{{ module.name }}</span>
+            <div class="flex items-center gap-3 mb-2">
+              <i :class="module.icon" class="text-4xl text-indigo-600"></i>
+              <span class="text-2xl font-black text-indigo-900">{{ module.name }}</span>
             </div>
           </template>
           
           <template #content>
-            <p class="text-slate-500 leading-relaxed min-h-[60px]">
+            <p class="text-slate-600 leading-relaxed min-h-[60px] font-medium">
               {{ module.description }}
             </p>
           </template>
           
           <template #footer>
             <Button 
-              label="Abrir Chamado" 
+              label="🚀 Abrir Chamado" 
               icon="pi pi-arrow-right" 
               iconPos="right"
-              class="w-full mt-2" 
-              outlined 
+              class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold" 
             />
           </template>
         </Card>

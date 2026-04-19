@@ -1,25 +1,25 @@
 <template>
   <AppLayout>
-    <div class="w-full max-w-3xl mx-auto">
+    <div class="w-full max-w-4xl mx-auto">
       <!-- Cabeçalho -->
-      <div class="mb-6 flex items-center justify-between">
+      <div class="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 class="text-3xl font-bold text-slate-800">Abertura de Chamado</h2>
-          <p class="text-slate-600 mt-1">Preencha os dados solicitados pelo setor para agilizar o seu atendimento.</p>
+          <h2 class="text-4xl font-black text-white drop-shadow-lg">🆕 Abertura de Chamado</h2>
+          <p class="text-indigo-200 mt-2 text-lg">Preencha os dados solicitados para agilizar seu atendimento</p>
         </div>
-        <Button label="Voltar" icon="pi pi-arrow-left" severity="secondary" text @click="router.back()" />
+        <Button label="← Voltar" icon="pi pi-arrow-left" severity="secondary" text class="font-bold hover:bg-indigo-500 transition px-3 py-2 rounded-lg text-white" @click="router.back()" />
       </div>
 
       <!-- Formulário Dinâmico -->
-      <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-        <div v-if="isLoading" class="flex justify-center p-8">
-          <i class="pi pi-spin pi-spinner text-4xl text-indigo-500"></i>
+      <div class="bg-gradient-to-br from-white to-indigo-50 p-8 rounded-2xl shadow-2xl border-2 border-indigo-300">
+        <div v-if="isLoading" class="flex justify-center p-12">
+          <i class="pi pi-spin pi-spinner text-6xl text-indigo-600"></i>
         </div>
         
         <form v-else @submit.prevent="submitTicket" class="space-y-6 flex flex-col">
-          <div v-for="field in dynamicFields" :key="field.id" class="flex flex-col gap-2">
-            <label :for="field.name" class="text-sm font-semibold text-slate-700">
-              {{ field.label }} <span v-if="field.required" class="text-red-500">*</span>
+          <div v-for="field in dynamicFields" :key="field.id" class="flex flex-col gap-3">
+            <label :for="field.name" class="text-base font-black text-indigo-900 uppercase tracking-wider">
+              {{ field.label }} <span v-if="field.required" class="text-red-600 text-2xl">*</span>
             </label>
             
             <!-- Campo de Texto Simples -->
@@ -28,7 +28,8 @@
               :id="field.name"
               v-model="formData[field.name]" 
               :required="field.required"
-              class="w-full"
+              class="w-full px-4 py-3 border-2 border-indigo-300 rounded-lg focus:border-indigo-600 focus:outline-none font-semibold"
+              placeholder="Digite aqui..."
             />
             
             <!-- Campo de Texto Longo (Textarea) -->
@@ -37,8 +38,9 @@
               :id="field.name"
               v-model="formData[field.name]" 
               :required="field.required"
-              rows="4"
-              class="w-full"
+              rows="5"
+              class="w-full px-4 py-3 border-2 border-indigo-300 rounded-lg focus:border-indigo-600 focus:outline-none font-semibold"
+              placeholder="Descreva detalhadamente..."
             />
             
             <!-- Campo de Seleção (Dropdown) -->
@@ -47,18 +49,27 @@
               :id="field.name"
               v-model="formData[field.name]" 
               :options="field.options" 
-              placeholder="Selecione uma opção"
-              class="w-full"
+              placeholder="🔽 Selecione uma opção"
+              class="w-full border-2 border-indigo-300 rounded-lg"
               :required="field.required"
             />
           </div>
           
-          <div class="pt-4 border-t border-slate-100 mt-6 flex justify-end">
+          <div class="pt-6 border-t-2 border-indigo-200 mt-8 flex justify-end gap-4">
+            <Button 
+              type="button"
+              label="Cancelar"
+              severity="secondary"
+              text
+              class="font-bold px-6 py-3 hover:bg-slate-200 transition rounded-lg"
+              @click="router.back()"
+            />
             <Button 
               type="submit" 
-              label="Enviar Chamado" 
+              label="✅ Enviar Chamado" 
               icon="pi pi-check" 
               :loading="isSubmitting"
+              class="font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white px-6 py-3"
             />
           </div>
         </form>
