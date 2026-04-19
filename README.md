@@ -82,13 +82,28 @@ A API estará rodando em `http://localhost:3000`.
 
 ### Passo 3: Executar o Frontend
 
+<<<<<<< HEAD
 Em uma nova aba do terminal, acesse a pasta do front-end e inicie a aplicação:
+=======
+O Frontend foi construído com **Vue 3 (Composition API)**, **Vite**, **Tailwind CSS** e componentes do **PrimeVue**.
+
+Em uma nova aba do terminal, acesse a pasta do frontend, configure as variáveis e inicie a aplicação:
+>>>>>>> 3ce8892... feat: integrate PrimeVue and TailwindCSS for UI components
 
 ```bash
 cd frontend
+
+# Copie o arquivo de ambiente para configurar a URL de acesso ao Backend
+cp .env.example .env
+
+# Instale todas as dependências
 npm install
-npm run dev  # ou 'npm start', dependendo do framework escolhido
+
+# Inicie o servidor de desenvolvimento
+npm run dev
 ```
+
+A interface do Helpdesk estará rodando e acessível em `http://localhost:5173`.
 
 ---
 

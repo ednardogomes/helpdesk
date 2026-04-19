@@ -1,7 +1,7 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <HelloWorld />
+  <router-view />
 </template>
+
+<script setup lang="ts">
+// O App.vue agora serve apenas como base (outlet) para o Vue Router renderizar as telas
+</script>
