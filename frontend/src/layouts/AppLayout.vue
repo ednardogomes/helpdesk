@@ -9,6 +9,7 @@
         severity="secondary" 
         text 
         class="text-white hover:bg-indigo-700 transition" 
+        @click="handleLogout"
       />
     </header>
     
@@ -20,4 +21,14 @@
 
 <script setup lang="ts">
 import Button from 'primevue/button';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/useAuthStore';
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+const handleLogout = () => {
+  authStore.logout();
+  router.push('/login');
+};
 </script>
