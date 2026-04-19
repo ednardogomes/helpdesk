@@ -15,14 +15,28 @@ const router = createRouter({
     {
       path: '/dashboard',
       name: 'dashboard',
-      component: () => import('../views/UserDashboard.vue')
+      component: () => import('../views/UserDashboard.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/ticket/new/:moduleId',
       name: 'new-ticket',
-      component: () => import('../views/NewTicket.vue')
+      component: () => import('../views/NewTicket.vue'),
+      meta: { requiresAuth: true }
     }
   ]
+});
+
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = !!localStorage.getItem('@Helpdesk:token');
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next({ name: 'login' });
+  } else if (to.name === 'login' && isAuthenticated) {
+    next({ name: 'dashboard' });
+  } else {
+    next();
+  }
 });
 
 export default router;
