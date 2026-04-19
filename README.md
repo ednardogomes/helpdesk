@@ -53,19 +53,29 @@ Para rodar o projeto do zero na sua máquina, siga os passos abaixo.
 - Node.js (versão 18 ou superior)
 - Docker e Docker Compose instalados
 
-### Passo 1: Subir o Banco de Dados
+### Passo 1: Configurar Variáveis de Ambiente do Backend
 
-A infraestrutura do banco de dados já está configurada no Docker. Na raiz do projeto, rode:
+O banco de dados e a aplicação precisam de variáveis de ambiente. Navegue até a pasta do backend e crie o arquivo `.env`:
 
 ```bash
+cd backend
+cp .env.example .env
+```
+
+### Passo 2: Subir o Banco de Dados
+
+Com o `.env` configurado, volte à raiz do projeto e suba a infraestrutura do banco de dados via Docker:
+
+```bash
+cd ..
 docker compose up -d
 ```
 
-_(Isso iniciará um container PostgreSQL com as credenciais padrões configuradas)._
+_(Isso iniciará um container PostgreSQL e o painel pgAdmin baseados nas credenciais do seu `.env`)._
 
-### Passo 2: Configurar e Rodar o Backend
+### Passo 3: Configurar e Rodar o Backend
 
-Navegue até a pasta do backend, instale as dependências e rode as migrations para criar a estrutura de tabelas:
+Volte para a pasta do backend, instale as dependências e rode as migrations para criar a estrutura de tabelas:
 
 ```bash
 cd backend
@@ -80,15 +90,11 @@ npm run start:dev
 
 A API estará rodando em `http://localhost:3000`.
 
-### Passo 3: Executar o Frontend
+### Passo 4: Executar o Frontend
 
-<<<<<<< HEAD
-Em uma nova aba do terminal, acesse a pasta do front-end e inicie a aplicação:
-=======
 O Frontend foi construído com **Vue 3 (Composition API)**, **Vite**, **Tailwind CSS** e componentes do **PrimeVue**.
 
 Em uma nova aba do terminal, acesse a pasta do frontend, configure as variáveis e inicie a aplicação:
->>>>>>> 3ce8892... feat: integrate PrimeVue and TailwindCSS for UI components
 
 ```bash
 cd frontend
