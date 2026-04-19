@@ -1,40 +1,184 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company } from './entities/company.entity';
+import { User } from '../users/entities/user.entity';
+import { Role } from '../users/enums/role.enum';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class CompaniesService {
   constructor(
     @InjectRepository(Company)
     private readonly companiesRepository: Repository<Company>,
-  ) {}
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) { }
 
   async create(createCompanyDto: any): Promise<Company> {
-    const company = this.companiesRepository.create(createCompanyDto as Partial<Company>);
-    return await this.companiesRepository.save(company);
+    try {
+      // Validar CNPJ único
+      if (createCompanyDto.cnpj) {
+        const existingCompany = await this.companiesRepository.findOne({
+          where: { cnpj: createCompanyDto.cnpj },
+        });
+        if (existingCompany) {
+          throw new ConflictException('CNPJ já registrado');
+        }
+      }
+
+      const company = this.companiesRepository.create(
+        createCompanyDto as Partial<Company>,
+      );
+      return await this.companiesRepository.save(company);
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      console.error('[CreateCompanyError]', error);
+      throw new BadRequestException('Erro ao criar empresa');
+    }
+  }
+
+  async registerCompanyWithAdmin(
+    registerDto: any,
+  ): Promise<{ company: Company; user: User }> {
+    try {
+      // Validar dados obrigatórios
+      if (
+        !registerDto.companyName ||
+        !registerDto.cnpj ||
+        !registerDto.fullName ||
+        !registerDto.email ||
+        !registerDto.password
+      ) {
+        throw new BadRequestException(
+          'Campos obrigatórios: companyName, cnpj, fullName, email, password',
+        );
+      }
+
+      // Validar se empresa já existe
+      const existingCompany = await this.companiesRepository.findOne({
+        where: { cnpj: registerDto.cnpj },
+      });
+      if (existingCompany) {
+        throw new ConflictException('CNPJ já registrado');
+      }
+
+      // Validar se email já existe
+      const existingUser = await this.usersRepository.findOne({
+        where: { email: registerDto.email },
+      });
+      if (existingUser) {
+        throw new ConflictException('Email já registrado');
+      }
+
+      // Criar empresa
+      const company = this.companiesRepository.create({
+        name: registerDto.companyName,
+        cnpj: registerDto.cnpj,
+        is_active: true,
+      });
+      const savedCompany = await this.companiesRepository.save(company);
+
+      try {
+        // Criar usuário admin para a empresa
+        const salt = await bcrypt.genSalt();
+        const hash = await bcrypt.hash(registerDto.password, salt);
+
+        const user = this.usersRepository.create({
+          name: registerDto.fullName,
+          email: registerDto.email,
+          password_hash: hash,
+          role: Role.ADMIN,
+          company_id: savedCompany.id,
+        });
+        const savedUser = await this.usersRepository.save(user);
+        const { password_hash, ...userResult } = savedUser;
+
+        return { company: savedCompany, user: userResult as any };
+      } catch (userError) {
+        // Se falhar ao criar usuário, remove a empresa criada para evitar órfãos
+        console.error('[UserCreationError]', userError);
+        try {
+          await this.companiesRepository.remove(savedCompany);
+        } catch (rollbackError) {
+          console.error('[RollbackError]', rollbackError);
+        }
+        throw new BadRequestException(
+          `Erro ao criar administrador: ${userError.message}`,
+        );
+      }
+    } catch (error) {
+      // Re-throw erros conhecidos
+      if (
+        error instanceof ConflictException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      // Logar e retornar erro genérico
+      console.error('[RegisterCompanyError]', error);
+      throw new BadRequestException(
+        'Erro ao registrar empresa. Tente novamente.',
+      );
+    }
   }
 
   async findAll(): Promise<Company[]> {
-    return await this.companiesRepository.find();
+    try {
+      return await this.companiesRepository.find();
+    } catch (error) {
+      console.error('[FindAllCompaniesError]', error);
+      throw new BadRequestException('Erro ao listar empresas');
+    }
   }
 
   async findOne(id: number): Promise<Company> {
-    const company = await this.companiesRepository.findOne({ where: { id } });
-    if (!company) {
-      throw new NotFoundException(`Company #${id} not found`);
+    try {
+      const company = await this.companiesRepository.findOne({ where: { id } });
+      if (!company) {
+        throw new NotFoundException(`Empresa #${id} não encontrada`);
+      }
+      return company;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error('[FindOneCompanyError]', error);
+      throw new BadRequestException('Erro ao buscar empresa');
     }
-    return company;
   }
 
   async update(id: number, updateCompanyDto: any): Promise<Company> {
-    const company = await this.findOne(id);
-    this.companiesRepository.merge(company, updateCompanyDto);
-    return await this.companiesRepository.save(company);
+    try {
+      const company = await this.findOne(id);
+      this.companiesRepository.merge(company, updateCompanyDto);
+      return await this.companiesRepository.save(company);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error('[UpdateCompanyError]', error);
+      throw new BadRequestException('Erro ao atualizar empresa');
+    }
   }
 
   async remove(id: number): Promise<void> {
-    const company = await this.findOne(id);
-    await this.companiesRepository.remove(company);
+    try {
+      const company = await this.findOne(id);
+      await this.companiesRepository.remove(company);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error('[RemoveCompanyError]', error);
+      throw new BadRequestException('Erro ao remover empresa');
+    }
   }
 }

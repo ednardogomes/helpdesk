@@ -9,7 +9,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(createUserDto: any): Promise<User> {
     const existingUser = await this.usersRepository.findOne({ where: { email: createUserDto.email } });
@@ -19,17 +19,24 @@ export class UsersService {
 
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(createUserDto.password, salt);
-    
+
     const user = this.usersRepository.create({
       ...createUserDto,
       password_hash: hash,
     } as Partial<User>);
-    
+
     return await this.usersRepository.save(user);
   }
 
   async findByEmail(email: string): Promise<User | null> {
     return await this.usersRepository.findOne({ where: { email } });
+  }
+
+  async findByCompanyId(companyId: number): Promise<User[]> {
+    return await this.usersRepository.find({
+      where: { company_id: companyId },
+      relations: ['company']
+    });
   }
 
   async findAll(): Promise<User[]> {
