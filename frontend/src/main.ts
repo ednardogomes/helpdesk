@@ -3,6 +3,7 @@ import { createPinia } from 'pinia';
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import { definePreset } from '@primevue/themes';
+import ToastService from 'primevue/toastservice';
 import 'primeicons/primeicons.css';
 
 import './style.css';
@@ -40,5 +41,6 @@ app.use(PrimeVue, {
         }
     }
 });
+app.use(ToastService);
 
 app.mount('#app');

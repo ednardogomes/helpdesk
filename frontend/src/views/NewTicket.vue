@@ -1,5 +1,6 @@
 <template>
   <AppLayout>
+    <Toast />
     <div class="w-full max-w-4xl mx-auto">
       <!-- Cabeçalho -->
       <div class="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -86,9 +87,13 @@ import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
 import Dropdown from 'primevue/dropdown';
 import Button from 'primevue/button';
+import { api } from '../services/api';
+import { useToast } from 'primevue/usetoast';
+import Toast from 'primevue/toast';
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 
 const isLoading = ref(true);
 const isSubmitting = ref(false);
@@ -129,20 +134,46 @@ const fetchDynamicSchema = async (moduleId: string) => {
 const submitTicket = async () => {
   isSubmitting.value = true;
   
-  // O Payload JSON perfeito que será enviado ao Backend TypeORM!
-  const payload = {
-    moduleId: route.params.moduleId,
-    dynamicData: formData.value
-  };
-  
-  console.log('Payload JSON Dinâmico Gerado:', payload);
-  
-  // Simulando requisição de post HTTP
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  alert('Chamado aberto com sucesso! Abra o Console (F12) para ver o Payload JSON criado pela renderização dinâmica.');
-  isSubmitting.value = false;
-  router.push('/dashboard');
+  try {
+    // Construct the payload for the backend
+    const moduleId = parseInt(route.params.moduleId as string);
+    
+    // Find the description field (textarea)
+    const descriptionField = dynamicFields.value.find(field => field.type === 'textarea');
+    const description = descriptionField ? formData.value[descriptionField.name] : 'No description provided';
+    
+    // Find subject (first select or text field)
+    const subjectField = dynamicFields.value.find(field => field.type === 'select' || field.type === 'text');
+    const subject = subjectField ? formData.value[subjectField.name] : 'New Ticket';
+    
+    const payload = {
+      module_id: moduleId,
+      subject: subject || 'New Ticket',
+      description: description || 'No description',
+      priority: 'MEDIUM' // Default priority
+    };
+    
+    await api.post('/tickets', payload);
+    
+    toast.add({
+      severity: 'success',
+      summary: 'Sucesso',
+      detail: 'Chamado criado com sucesso!',
+      life: 3000
+    });
+    
+    router.push('/dashboard');
+  } catch (error: any) {
+    console.error('Error creating ticket:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Erro',
+      detail: error.response?.data?.message || 'Erro ao criar chamado',
+      life: 5000
+    });
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 onMounted(() => {
