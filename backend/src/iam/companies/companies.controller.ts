@@ -50,4 +50,10 @@ export class CompaniesController {
   remove(@Param('id') id: string) {
     return this.companiesService.remove(+id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/assign-modules')
+  assignAllModules(@Param('id') id: string) {
+    return this.companiesService.assignAllModulesToCompany(+id);
+  }
 }

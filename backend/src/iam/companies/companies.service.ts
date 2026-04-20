@@ -41,7 +41,21 @@ export class CompaniesService {
       const company = this.companiesRepository.create(
         createCompanyDto as Partial<Company>,
       );
-      return await this.companiesRepository.save(company);
+      const savedCompany = await this.companiesRepository.save(company);
+
+      // Assign access to all active modules
+      const activeModules = await this.modulesRepository.find({
+        where: { is_active: true },
+      });
+      const accessEntries = activeModules.map((module) =>
+        this.accessRepository.create({
+          module_id: module.id,
+          company_id: savedCompany.id,
+        }),
+      );
+      await this.accessRepository.save(accessEntries);
+
+      return savedCompany;
     } catch (error) {
       if (error instanceof ConflictException) {
         throw error;
@@ -197,6 +211,29 @@ export class CompaniesService {
       }
       console.error('[RemoveCompanyError]', error);
       throw new BadRequestException('Erro ao remover empresa');
+    }
+  }
+
+  async assignAllModulesToCompany(companyId: number): Promise<void> {
+    try {
+      const company = await this.findOne(companyId);
+      // Remove existing accesses to avoid duplicates
+      await this.accessRepository.delete({ company_id: companyId });
+
+      // Assign access to all active modules
+      const activeModules = await this.modulesRepository.find({
+        where: { is_active: true },
+      });
+      const accessEntries = activeModules.map((module) =>
+        this.accessRepository.create({
+          module_id: module.id,
+          company_id: companyId,
+        }),
+      );
+      await this.accessRepository.save(accessEntries);
+    } catch (error) {
+      console.error('[AssignModulesError]', error);
+      throw new BadRequestException('Erro ao atribuir módulos à empresa');
     }
   }
 }
