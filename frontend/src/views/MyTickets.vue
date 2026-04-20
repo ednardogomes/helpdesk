@@ -26,6 +26,7 @@
                 <tr>
                   <th class="px-6 py-4 font-black text-indigo-900 uppercase tracking-wider">🔢 ID</th>
                   <th class="px-6 py-4 font-black text-indigo-900 uppercase tracking-wider">📝 Assunto</th>
+                  <th class="px-6 py-4 font-black text-indigo-900 uppercase tracking-wider">📄 Descrição</th>
                   <th class="px-6 py-4 font-black text-indigo-900 uppercase tracking-wider">📊 Status</th>
                   <th class="px-6 py-4 font-black text-indigo-900 uppercase tracking-wider">⚡ Prioridade</th>
                   <th class="px-6 py-4 font-black text-indigo-900 uppercase tracking-wider">📅 Criado em</th>
@@ -35,6 +36,7 @@
                 <tr v-for="ticket in tickets" :key="ticket.id" class="hover:bg-indigo-100 transition-colors duration-200 cursor-pointer">
                   <td class="px-6 py-4 text-slate-800 font-bold">{{ ticket.id }}</td>
                   <td class="px-6 py-4 text-slate-700 font-semibold">{{ ticket.subject }}</td>
+                  <td class="px-6 py-4 text-slate-600 max-w-xs truncate" :title="ticket.description">{{ ticket.description || '-' }}</td>
                   <td class="px-6 py-4">
                     <span class="inline-block px-3 py-1 bg-blue-200 text-blue-900 rounded-full font-bold text-sm">{{ ticket.status }}</span>
                   </td>
