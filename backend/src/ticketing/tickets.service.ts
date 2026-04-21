@@ -1,10 +1,16 @@
-import { Injectable, ForbiddenException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ticket } from './entities/ticket.entity';
 import { ModuleCompanyAccess } from '../helpdesk-modules/entities/module-company-access.entity';
 import { TicketStatus } from './enums/ticket-status.enum';
 import { NotificationsService } from '../notifications/notifications.service';
+import { CreateTicketDto } from './dto/create-ticket.dto';
 
 @Injectable()
 export class TicketsService {
@@ -14,10 +20,17 @@ export class TicketsService {
     @InjectRepository(ModuleCompanyAccess)
     private readonly accessRepository: Repository<ModuleCompanyAccess>,
     private readonly notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
-  async create(createTicketDto: any, userId: number, companyId: number): Promise<Ticket> {
-    if (!createTicketDto.description || createTicketDto.description.trim() === '') {
+  async create(
+    createTicketDto: CreateTicketDto,
+    userId: number,
+    companyId: number,
+  ): Promise<Ticket> {
+    if (
+      !createTicketDto.description ||
+      createTicketDto.description.trim() === ''
+    ) {
       throw new BadRequestException('A descrição é obrigatória');
     }
 
@@ -27,11 +40,13 @@ export class TicketsService {
 
     // Validar se a empresa do usuário tem acesso a este módulo
     const hasAccess = await this.accessRepository.findOne({
-      where: { module_id: createTicketDto.module_id, company_id: companyId }
+      where: { module_id: createTicketDto.module_id, company_id: companyId },
     });
 
     if (!hasAccess) {
-      throw new ForbiddenException('Sua empresa não tem permissão para abrir chamados neste setor.');
+      throw new ForbiddenException(
+        'Sua empresa não tem permissão para abrir chamados neste setor.',
+      );
     }
 
     const ticket = this.ticketRepository.create({
@@ -47,7 +62,7 @@ export class TicketsService {
     return await this.ticketRepository.find({
       where: { requester_id: userId },
       relations: ['module'],
-      order: { created_at: 'DESC' }
+      order: { created_at: 'DESC' },
     });
   }
 
@@ -55,7 +70,7 @@ export class TicketsService {
   async findOne(id: number, userId: number, role: string): Promise<Ticket> {
     const ticket = await this.ticketRepository.findOne({
       where: { id },
-      relations: ['module', 'requester', 'assignedAgent', 'comments']
+      relations: ['module', 'requester', 'assignedAgent', 'comments'],
     });
 
     if (!ticket) {
@@ -64,12 +79,14 @@ export class TicketsService {
 
     // Se for usuário comum, só pode ver o próprio ticket
     if (role === 'USER' && ticket.requester_id !== userId) {
-      throw new ForbiddenException('Você não tem permissão para visualizar este chamado.');
+      throw new ForbiddenException(
+        'Você não tem permissão para visualizar este chamado.',
+      );
     }
 
     // Filtrar comentários se for usuário (não deve ver is_internal = true)
     if (role === 'USER' && ticket.comments) {
-      ticket.comments = ticket.comments.filter(c => !c.is_internal);
+      ticket.comments = ticket.comments.filter((c) => !c.is_internal);
     }
 
     return ticket;
@@ -88,7 +105,7 @@ export class TicketsService {
     await this.notificationsService.create(
       ticket.requester_id,
       `Seu chamado #${ticket.id} está sendo atendido!`,
-      `/tickets/${ticket.id}`
+      `/tickets/${ticket.id}`,
     );
 
     return updated;
@@ -108,7 +125,7 @@ export class TicketsService {
     await this.notificationsService.create(
       ticket.requester_id,
       `O status do seu chamado #${ticket.id} mudou para ${status}`,
-      `/tickets/${ticket.id}`
+      `/tickets/${ticket.id}`,
     );
 
     return updated;
