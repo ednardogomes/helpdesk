@@ -15,6 +15,7 @@ export interface User {
 export interface Ticket {
   id: number;
   subject: string;
+  description: string;
   status: string;
   priority: string;
   created_at: string;

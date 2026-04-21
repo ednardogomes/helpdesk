@@ -5,6 +5,7 @@ import { RolesGuard } from '../iam/auth/roles.guard';
 import { Roles } from '../iam/auth/roles.decorator';
 import { Role } from '../iam/users/enums/role.enum';
 import { TicketStatus } from './enums/ticket-status.enum';
+import { CreateTicketDto } from './dto/create-ticket.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('tickets')
@@ -12,7 +13,7 @@ export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
   @Post()
-  create(@Body() createTicketDto: any, @Request() req: any) {
+  create(@Body() createTicketDto: CreateTicketDto, @Request() req: any) {
     const userId = req.user.userId; // Vem do JwtStrategy (sub)
     const companyId = req.user.company_id; // Vem do JwtStrategy
     return this.ticketsService.create(createTicketDto, userId, companyId);
