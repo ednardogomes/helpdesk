@@ -67,21 +67,6 @@ export class CompaniesService {
 
   async registerCompanyWithAdmin(
     registerDto: any,
-  ): Promise<{ company: Company; user: User }> {
-    try {
-      // Validar dados obrigatórios
-      if (
-        !registerDto.companyName ||
-        !registerDto.cnpj ||
-        !registerDto.fullName ||
-        !registerDto.email ||
-        !registerDto.password
-      ) {
-        throw new BadRequestException(
-          'Campos obrigatórios: companyName, cnpj, fullName, email, password',
-        );
-      }
-
       // Validar se empresa já existe
       const existingCompany = await this.companiesRepository.findOne({
         where: { cnpj: registerDto.cnpj },

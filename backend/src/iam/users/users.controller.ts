@@ -11,6 +11,7 @@ import {
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Role } from './enums/role.enum';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
@@ -18,7 +19,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post()
-  async create(@Body() createUserDto: any, @Request() req: any) {
+  async create(@Body() createUserDto: CreateUserDto, @Request() req: any) {
     // Apenas ADMIN e SUPER_ADMIN podem criar novos usuários
     if (req.user.role !== Role.ADMIN && req.user.role !== Role.SUPER_ADMIN) {
       throw new ForbiddenException(
